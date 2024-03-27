@@ -1,14 +1,16 @@
 package querier
 
-import "bytes"
+import (
+	"bytes"
+	"errors"
+	"slices"
+)
 
 
 
 const (
     MATCH = "#match?"
 )
-
-type MATCH_TYPE string
 
 type ParameterizedQuery string
 
@@ -19,7 +21,7 @@ type ParameterizedQuery string
 //copy paste it in your code tho.
 type QueryBuilder struct {
     rootNode *SExpression
-    matcher *Matcher
+    matchers []*Matcher
     Values []string
 }
 
@@ -28,7 +30,26 @@ func (q *QueryBuilder) NewSExpression(name string) *SExpression {
 
     newSE := SExpression{identifier: name}
     q.rootNode = &newSE
+
     return &newSE
+}
+
+func (q *QueryBuilder) GetValue(value string) (string, error) {
+
+    if slices.Contains[[]string, string](q.Values, value)    {
+        return value, nil
+    }
+
+    return "", errors.New("Couldn't get value")
+}
+
+//Creates a new Matcher for the query
+func (q *QueryBuilder) NewMatcher(predicate string) *Matcher {
+
+    matcher := &Matcher{predicate: predicate}
+    q.matchers = append(q.matchers, matcher)
+
+    return matcher
 }
 
 //Construct the string representation of your query
@@ -37,7 +58,15 @@ func (q *QueryBuilder) Marshal() string {
     var b bytes.Buffer
     b.WriteString("(\n")
     marshal("", q.rootNode, &b)
+
+    for _, m := range q.matchers {
+        b.WriteString("\n(")
+        m.marshal(&b)
+        b.WriteString(")")
+    }
+
     b.WriteString("\n)")
+
     return b.String()
 }
 
@@ -111,10 +140,6 @@ func marshal(indent string, s *SExpression, b *bytes.Buffer) *bytes.Buffer {
     return b
 }
 
-type Matcher struct {
-
-}
-
 //Tree sitter expression of a syntax node
 type SExpression struct {
 
@@ -147,6 +172,7 @@ type SExpression struct {
 func (e *SExpression) Alternation() *SExpression {
 
     e.alternation = true
+
     return e
 }
 
@@ -155,6 +181,7 @@ func (e *SExpression) Alternation() *SExpression {
 func (e *SExpression) Group() *SExpression {
 
     e.group = true
+
     return e
 }
 
@@ -162,6 +189,7 @@ func (e *SExpression) Group() *SExpression {
 func (e *SExpression) AnchorAfter() *SExpression {
 
     e.anchorAfter = true
+
     return e
 }
 
@@ -169,6 +197,7 @@ func (e *SExpression) AnchorAfter() *SExpression {
 func (e *SExpression) AnchorBefore() *SExpression {
 
     e.anchorBefore = true
+
     return e
 }
 
@@ -185,6 +214,7 @@ func (e *SExpression) For(condition func() bool, operation func (e *SExpression)
 func (e *SExpression) Quantifier(value string) *SExpression {
 
     e.quantifier = value
+
     return e
 }
 
@@ -194,6 +224,7 @@ func (e *SExpression) If(condition bool, operation func(e *SExpression)) * SExpr
     if condition {
         operation(e)
     }
+
     return e
 }
 
@@ -257,5 +288,67 @@ func (s *SExpression) End() *SExpression {
 
 //Creates a new query builder.
 func Init() *QueryBuilder {
+
     return &QueryBuilder{}
+}
+
+//Matcher appended a the end of the query if it exists
+type Matcher struct {
+    predicate string
+    identifier string
+    values []string
+}
+
+//Setter for the identifier
+func (m *Matcher) Identifier(value string) *Matcher {
+
+    m.identifier = value
+
+    return m
+}
+
+//Simple Setter for the value
+func (m *Matcher) Value(value string) *Matcher {
+
+    m.values = append(m.values, value)
+
+    return m
+}
+
+//Transforms the struct into a string that represents a pattern matcher in the query
+func (m *Matcher) marshal(b *bytes.Buffer) {
+
+    b.WriteString("#")
+    b.WriteString(m.predicate)
+    b.WriteString("? @")
+    b.WriteString(m.identifier)
+
+    for _, val := range m.values {
+        b.WriteString(" ")
+        b.WriteString(val)
+    }
+}
+
+//Adds a value as a capture of the query.
+//Means that if the string you give it doesn't start with an '@',
+//it will prepend one.
+func (m *Matcher) ValueAsCapture(value string) *Matcher {
+
+    if len(value) > 0 && value[0] == '@' {
+        m.values = append(m.values, value)
+        return m
+    }
+
+    m.values = append(m.values, "@" + value)
+
+    return m
+}
+
+//Adds a value as a string to match with the predicate
+//Means that it will append a '"' at the start and end of your value
+func (m *Matcher) ValueAsString(value string) *Matcher {
+
+    m.values = append(m.values, `"` + value + `"`)
+
+    return m
 }

@@ -121,7 +121,9 @@ func TestAlternation(t *testing.T) {
         NewSExpression("").Value("while").End().
         Var("keyword", query).
     End()
+
     result := query.Marshal()
+
     if result != expected {
         t.Fatalf("Expected %s, got %s", expected, result)
     }
@@ -140,7 +142,9 @@ func TestAnchorBefore(t *testing.T) {
             Var("the-element", query).
             End().
     End()
+
     result := query.Marshal()
+
     if result != expected {
         t.Fatalf("Expected %s, got %s", expected, result)
     }
@@ -159,7 +163,9 @@ func TestAnchorAfter(t *testing.T) {
             AnchorAfter().
             End().
     End()
+
     result := query.Marshal()
+
     if result != expected {
         t.Fatalf("Expected %s, got %s", expected, result)
     }
@@ -208,7 +214,9 @@ func TestIfFor(t *testing.T) {
             }).
         Var("myexpression", query).
     End()
+
     result := query.Marshal()
+
     if result != expected {
         t.Fatalf("Expected %s, got %s", expected, result)
     }
@@ -231,9 +239,34 @@ func TestMultipleChildsForGroup(t *testing.T) {
             NewSExpression("integer_literal").End().
         End().
     End()
+
     result := query.Marshal()
+
     if expected != result {
         t.Fatalf("Expected %s, got %s", expected, result)
     }
 }
 
+func TestPatternMatching(t *testing.T) {
+    expected := `(
+(identifier) @variable.builtin
+(#eq? @variable.builtin "self")
+)`
+    query := Init()
+    query.
+    NewSExpression("identifier").
+        Var("variable.builtin", query)
+
+    identifier, err := query.GetValue("variable.builtin")
+
+    if err != nil {
+        t.Fatalf("Expected no error, got %s", err)
+    }
+
+    query.NewMatcher("eq").Identifier(identifier).ValueAsString("self")
+    result := query.Marshal()
+    
+    if expected != result {
+        t.Fatalf("Expected %s, got %s", expected, result)
+    }
+}
