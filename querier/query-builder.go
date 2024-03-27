@@ -78,7 +78,9 @@ func marshal(indent string, s *SExpression, b *bytes.Buffer) *bytes.Buffer {
          if s.property != "" {
             b.WriteString(": ")
         }
+        b.WriteString("\"")
         b.WriteString(s.value)
+        b.WriteString("\"")
     }
 
 
@@ -156,12 +158,33 @@ func (e *SExpression) Group() *SExpression {
     return e
 }
 
+//Sets an anchor after the expression
+func (e *SExpression) AnchorAfter() *SExpression {
+
+    e.anchorAfter = true
+    return e
+}
+
+//Sets an anchor before the expression
+func (e *SExpression) AnchorBefore() *SExpression {
+
+    e.anchorBefore = true
+    return e
+}
+
 //Allows for creation of a query by using a for loop
 func (e *SExpression) For(condition func() bool, operation func (e *SExpression), termination func()) *SExpression {
     for condition() {
         operation(e)
         termination()
     }
+    return e
+}
+
+//Adds a quantifier to the expression.
+func (e *SExpression) Quantifier(value string) *SExpression {
+
+    e.quantifier = value
     return e
 }
 

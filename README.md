@@ -4,6 +4,8 @@
 
 TQB is a golang library that sould be used in conjonction with the go-tree-sitter library.
 
+You can get more details on tree sitter queries from [here](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries)
+
 It aims to ease the construction of Pattern Macthing queries, and provide you a way create queries dynamically, like such:
 
 ```go

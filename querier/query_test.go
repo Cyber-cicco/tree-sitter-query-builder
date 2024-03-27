@@ -22,6 +22,29 @@ func TestBinaryExpression(t *testing.T) {
     }
 }
 
+func TestNoIdentifierExpression(t *testing.T) {
+    expected := `(
+(binary_expression
+    operator: "!="
+    right: (null))
+)`
+    query := Init()
+    query.
+    NewSExpression("binary_expression").
+        NewSExpression("").
+            Prop("operator").
+            Value("!=").
+            End().
+        NewSExpression("null").
+            Prop("right").
+            End().
+    End()
+    result := query.Marshal()
+    if result != expected {
+        t.Fatalf("Expected %s, got %s", expected, result)
+    }
+}
+
 func TestParamNegation(t *testing.T) {
     expected := `(
 (class_declaration
@@ -46,6 +69,101 @@ func TestParamNegation(t *testing.T) {
     }
 }
 
+func TestQuantifier(t *testing.T) {
+    expected := `(
+(class_declaration
+    (decorator)* @the-decorator
+    name: (identifier) @the-name)
+)`
+    query := Init()
+    query.
+    NewSExpression("class_declaration").
+        NewSExpression("decorator").
+            Quantifier("*").
+            Var("the-decorator", query).
+            End().
+        NewSExpression("identifier").
+            Var("the-name", query).
+            Prop("name").
+            End().
+    End()
+    result := query.Marshal()
+    if result != expected {
+        t.Fatalf("Expected %s, got %s", expected, result)
+    }
+}
+
+func TestAlternation(t *testing.T) {
+    expected := `(
+[
+    "break"
+    "delete"
+    "else"
+    "for"
+    "function"
+    "if"
+    "return"
+    "try"
+    "while"] @keyword
+)`
+    query := Init()
+    query.
+    NewSExpression("").
+        Alternation().
+        NewSExpression("").Value("break").End().
+        NewSExpression("").Value("delete").End().
+        NewSExpression("").Value("else").End().
+        NewSExpression("").Value("for").End().
+        NewSExpression("").Value("function").End().
+        NewSExpression("").Value("if").End().
+        NewSExpression("").Value("return").End().
+        NewSExpression("").Value("try").End().
+        NewSExpression("").Value("while").End().
+        Var("keyword", query).
+    End()
+    result := query.Marshal()
+    if result != expected {
+        t.Fatalf("Expected %s, got %s", expected, result)
+    }
+}
+
+func TestAnchorBefore(t *testing.T) {
+    expected := `(
+(array
+    . (identifier) @the-element)
+)`
+    query := Init()
+    query.
+    NewSExpression("array").
+        NewSExpression("identifier").
+            AnchorBefore().
+            Var("the-element", query).
+            End().
+    End()
+    result := query.Marshal()
+    if result != expected {
+        t.Fatalf("Expected %s, got %s", expected, result)
+    }
+}
+
+func TestAnchorAfter(t *testing.T) {
+    expected := `(
+(block
+    (_) @last-expression .)
+)`
+    query := Init()
+    query.
+    NewSExpression("block").
+        NewSExpression("_").
+            Var("last-expression", query).
+            AnchorAfter().
+            End().
+    End()
+    result := query.Marshal()
+    if result != expected {
+        t.Fatalf("Expected %s, got %s", expected, result)
+    }
+}
 func TestIfFor(t *testing.T) {
     expected := `(
 (call_expression
