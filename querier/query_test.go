@@ -30,9 +30,15 @@ func TestParamNegation(t *testing.T) {
 )`
     query := Init()
     query.
-    NewSExpression("binary_expression").
-        NewSExpression("number_literal").End().
-        NewSExpression("number_literal").End().
+    NewSExpression("class_declaration").
+        NewSExpression("identifier").
+            Prop("name").
+            Var("class_name", query).
+            End().
+        NewSExpression("").
+            Not().
+            Prop("type_parameters").
+            End().
     End()
     result := query.Marshal()
     if result != expected {

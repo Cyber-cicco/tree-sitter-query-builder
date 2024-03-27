@@ -56,7 +56,6 @@ func marshal(indent string, s *SExpression, b *bytes.Buffer) *bytes.Buffer {
 
     if s.property != "" {
         b.WriteString(s.property)
-        b.WriteString(": ")
     }
 
     if s.alternation {
