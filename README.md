@@ -1,7 +1,5 @@
 # Tree-sitter Query Builder
 
-**It is still an experimental library, you shouldn't expect it to produce valid queries for now**
-
 TQB is a golang library that sould be used in conjonction with the go-tree-sitter library.
 
 You can get more details on tree sitter queries from [here](https://tree-sitter.github.io/tree-sitter/using-parsers#pattern-matching-with-queries)
@@ -10,7 +8,7 @@ It aims to ease the construction of Pattern Macthing queries, and provide you a 
 
 ```go
 func Query() string {
-    query := querier.Init()
+    query := querier.NewQB()
     i := 0
     query.
     NewSExpression("call_expression").
@@ -62,9 +60,10 @@ This is the equivalent of that string :
 )`
 ```
 
+You can find example of building queries from the tree sitter documentation in [this file](./querier/query_test.go)
+
 That way, you souldn't have to worry about syntax errors in your string queries anymore.
 
-If your really care a lot about performances and do not have to generate the string base on input, you can still use this library to
-construct the query, print the result in your terminal, and copy paste it in your code.
+## Performances
 
-Benchmarks between different ways of constructing a query will soon be added.
+Benchmarking shows that it takes approximately 5x times to get a query from the query builder than the parameterized query for a medium sized query. However, doing the query takes approximately 1000x more time than getting the query object with a query builder, so the difference is slim.

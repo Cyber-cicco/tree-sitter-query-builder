@@ -53,7 +53,7 @@ func (q *QueryBuilder) NewMatcher(predicate string) *Matcher {
 }
 
 //Construct the string representation of your query
-func (q *QueryBuilder) Marshal() string {
+func (q *QueryBuilder) Marshal() Query {
 
     var b bytes.Buffer
     b.WriteString("(\n")
@@ -67,7 +67,7 @@ func (q *QueryBuilder) Marshal() string {
 
     b.WriteString("\n)")
 
-    return b.String()
+    return Query{Query: b.Bytes()}
 }
 
 //Recursive function allowing for the construction of the query
@@ -126,7 +126,9 @@ func marshal(indent string, s *SExpression, b *bytes.Buffer) *bytes.Buffer {
         b.WriteString(")")
     }
 
-    b.WriteString(s.quantifier)
+    if s.quantifier != "" {
+        b.WriteString(s.quantifier)
+    }
 
     if s.variable != "" {
         b.WriteString(" ")
@@ -248,7 +250,7 @@ func (s *SExpression) Not() *SExpression {
     return s
 }
 
-//Prefixes the expression with a property file, like so "prop : (expression)"
+//Prefixes the expression with a property, like so "prop : (expression)"
 func (s *SExpression) Prop(value string) *SExpression {
 
     s.property = value
@@ -287,7 +289,7 @@ func (s *SExpression) End() *SExpression {
 }
 
 //Creates a new query builder.
-func Init() *QueryBuilder {
+func NewQB() *QueryBuilder {
 
     return &QueryBuilder{}
 }
