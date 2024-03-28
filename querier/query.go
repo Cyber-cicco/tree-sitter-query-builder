@@ -1,7 +1,7 @@
 package querier
 
 import (
-	sitter "github.com/Cyber-cicco/go-tree-sitter"
+	sitter "github.com/smacker/go-tree-sitter"
 )
 
 type Query struct {
