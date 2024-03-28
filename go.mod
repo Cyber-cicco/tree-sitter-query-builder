@@ -2,4 +2,4 @@ module github.com/Cyber-cicco/tree-sitter-query-builder
 
 go 1.21.6
 
-require github.com/Cyber-cicco/go-tree-sitter v0.1.0 // indirect
+require github.com/smacker/go-tree-sitter v0.0.0-20240320021847-a4b649a78290

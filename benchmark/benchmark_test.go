@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	sitter "github.com/Cyber-cicco/go-tree-sitter"
-	"github.com/Cyber-cicco/go-tree-sitter/java"
+	sitter "github.com/smacker/go-tree-sitter"
+	"github.com/smacker/go-tree-sitter/java"
 	"github.com/Cyber-cicco/tree-sitter-query-builder/querier"
 )
 
