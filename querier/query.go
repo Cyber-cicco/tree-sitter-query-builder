@@ -11,7 +11,13 @@ type Query struct {
     Tree *sitter.Tree
 }
 
-func (q *Query) ExecuteQuery(captureFunc func(c *sitter.QueryCapture) error) error {
+type CaptureFunc func(c *sitter.QueryCapture) error
+
+//Executes the Query.Query slice of bytes as a tree sitter query.
+//
+//Return every matches found for the query
+//Filters predicates
+func (q *Query) ExecuteQuery(captureFunc CaptureFunc) error {
 
     query, err := sitter.NewQuery(q.Query, q.Lang)
 
@@ -34,6 +40,41 @@ func (q *Query) ExecuteQuery(captureFunc func(c *sitter.QueryCapture) error) err
 
         for _, c := range m.Captures {
             err := captureFunc(&c)
+
+            if err != nil {
+                return err
+            }
+        }
+    }
+
+    return nil 
+}
+
+//Executes the Query.Query slice of bytes as a tree sitter query.
+//
+//Return every matches found for the query
+//Doesn't filter predicates
+func (q *Query) ExecuteSimpleQuery(captureFunc CaptureFunc) error {
+
+    query, err := sitter.NewQuery(q.Query, q.Lang)
+
+    if err != nil {
+        return err
+    }
+
+    qc := sitter.NewQueryCursor()
+    qc.Exec(query, q.Tree.RootNode())
+
+    for {
+
+        m, ok := qc.NextMatch()
+
+        if !ok {
+            break
+        }
+
+        for _, c := range m.Captures {
+           err := captureFunc(&c)
 
             if err != nil {
                 return err
