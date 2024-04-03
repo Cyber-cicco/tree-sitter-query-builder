@@ -11,7 +11,7 @@ type Query struct {
     Tree *sitter.Tree
 }
 
-func (q *Query) ExecuteQuery(captureFunc func(c *sitter.QueryCapture)) error {
+func (q *Query) ExecuteQuery(captureFunc func(c *sitter.QueryCapture) error) error {
 
     query, err := sitter.NewQuery(q.Query, q.Lang)
 
@@ -26,7 +26,6 @@ func (q *Query) ExecuteQuery(captureFunc func(c *sitter.QueryCapture)) error {
 
         m, ok := qc.NextMatch()
 
-
         if !ok {
             break
         }
@@ -34,7 +33,11 @@ func (q *Query) ExecuteQuery(captureFunc func(c *sitter.QueryCapture)) error {
         m = qc.FilterPredicates(m, q.Content)
 
         for _, c := range m.Captures {
-            captureFunc(&c)
+            err := captureFunc(&c)
+
+            if err != nil {
+                return err
+            }
         }
     }
 
