@@ -2,6 +2,7 @@ package querier
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	sitter "github.com/smacker/go-tree-sitter"
@@ -138,7 +139,6 @@ func TestFirstMatch(t *testing.T) {
 		Prop("value").
 		NewSExpression("string_fragment")
 
-
 	query := qb.Marshal()
 	query.Content = []byte(CONTENT)
 	query.Lang = lang
@@ -171,11 +171,12 @@ func TestFirstMatch(t *testing.T) {
 	}
 
 	noMatch := GetFirstMatch(captures[0].Node, func(node *sitter.Node) bool {
-			return node.Type() == "class_declaration"
-		})
+		return node.Type() == "class_declaration"
+	})
 
 	if noMatch != nil {
 		t.Fatalf("expected nil, got %v", noMatch)
 	}
 
 }
+
