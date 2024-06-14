@@ -66,6 +66,46 @@ func GetFirstMatch(curr *sitter.Node, matcher matchingFunc) *sitter.Node {
 	return nil
 }
 
+// Retrieves all sibling nodes of a given node.
+func GetSiblings(node *sitter.Node) []*sitter.Node {
+    var siblings []*sitter.Node
+    parent := node.Parent()
+    if parent == nil {
+        return siblings
+    }
+    for i := 0; i < int(parent.ChildCount()); i++ {
+        sibling := parent.Child(i)
+        if !sibling.Equal(node) {
+            siblings = append(siblings, sibling)
+        }
+    }
+    return siblings
+}
+
+// Takes a string as a parameter, and finds all matching nodes with the given type
+func QuerySelectorAll(curr *sitter.Node, query string, matched []*sitter.Node) []*sitter.Node {
+    return GetChildrenMatching(curr, func(node *sitter.Node) bool {
+        return node.Type() == query
+    }, matched)
+}
+
+// Takes a string as a parameter, and matches it to the type of the node
+// Uses depth first search
+func QuerySelector(curr *sitter.Node, query string) *sitter.Node {
+    return GetFirstMatch(curr, func(node *sitter.Node) bool {
+        return node.Type() == query
+    })
+}
+
+// Takes a string as a parameter, and matches it to the type of the node
+// Uses breadth first search
+func BreadthSelector(curr *sitter.Node, query string) *sitter.Node {
+    return BreadthFirstMatch(curr, func(node *sitter.Node) bool {
+        return node.Type() == query
+    })
+}
+
+// Finds the first node matching a boolean using breadth first search
 func BreadthFirstMatch(curr *sitter.Node, matcher matchingFunc) *sitter.Node {
     //mut
     root := curr
