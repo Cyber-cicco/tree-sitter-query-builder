@@ -123,6 +123,22 @@ func TestExecuteSimpleQuery(t *testing.T) {
 	}
 }
 
+func TestBreadthFirstMatch(t *testing.T) {
+	tree, _ := parser.ParseCtx(context.Background(), nil, []byte(CONTENT))
+    root := tree.RootNode()
+    pack := GetFirstMatch(root, func(node *sitter.Node) bool {
+        return node.Type() == "package_declaration"
+    })
+    name := BreadthFirstMatch(pack, func(node *sitter.Node) bool {
+        return node.Type() == "identifier"
+    }).Content([]byte(CONTENT))
+    expected := "page" 
+
+    if name != expected {
+        t.Fatalf("Expected %s, got %s", expected, name)
+    }
+}
+
 func TestFirstMatch(t *testing.T) {
 
 	qb := NewQB()

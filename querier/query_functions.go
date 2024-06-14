@@ -30,6 +30,7 @@ func GetChildrenMatchingAtMaxDepth(curr *sitter.Node, matcher matchingFunc, matc
 	return getChildrenMatchingAtDepht(curr, matcher, matched, 1, maxDepht)
 }
 
+// Recursive call of getChildrenMatchingAtDepht
 func getChildrenMatchingAtDepht(curr *sitter.Node, matcher matchingFunc, matched []*sitter.Node, depht, maxDepht int) []*sitter.Node {
 	if depht > maxDepht {
 		return matched
@@ -47,6 +48,7 @@ func getChildrenMatchingAtDepht(curr *sitter.Node, matcher matchingFunc, matched
 // Recursively parses every subnodes of a given sitter node to find the first child matching
 // a pattern defined in a func.
 // If the node itself matches the function, returns itself as the first node matching the condition.
+// It's a depht first search
 func GetFirstMatch(curr *sitter.Node, matcher matchingFunc) *sitter.Node {
 
 	if matcher(curr) {
@@ -62,4 +64,25 @@ func GetFirstMatch(curr *sitter.Node, matcher matchingFunc) *sitter.Node {
 	}
 
 	return nil
+}
+
+func BreadthFirstMatch(curr *sitter.Node, matcher matchingFunc) *sitter.Node {
+    //mut
+    root := curr
+    //mut
+    queue := []*sitter.Node{root}
+
+    for len(queue) > 0 {
+        //mutation
+        root = queue[0]
+        for i := 0; i < int(root.ChildCount()); i++ {
+            n := root.Child(i)
+            queue = append(queue, n)
+            if matcher(n) {
+                return n
+            }
+        }
+        queue = queue[1:]
+    }
+    return nil
 }
